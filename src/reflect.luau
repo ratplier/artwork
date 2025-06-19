@@ -51,8 +51,4 @@ function Reflect.defineMetadata(object: object, key: string, value: unknown)
     metadata[key] = value
 end
 
-function Reflect.hasMetadata(object: object): boolean
-    return internal.objToId[object] ~= nil
-end
-
 return Reflect

@@ -1,5 +1,4 @@
 --!strict
-local Reflect = require("./reflect")
 local Signal = require("./signal")
 
 type object = {}
@@ -26,10 +25,6 @@ local internal = {
 }
 
 local Modding = {}
-
-function Modding.getObjectFromId(id: string)
-    return Reflect.idToObj[id]
-end
 
 function Modding.addListener(object: object)
 	if typeof(object) ~= "table" then return end
