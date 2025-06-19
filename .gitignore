@@ -1,0 +1,10 @@
+#build files
+/*.rbxlx
+/*.rbxl
+/*.rbxm
+
+/*.rbxlx.lock
+/*.rbxl.lock
+
+#rojo
+sourcemap.json
