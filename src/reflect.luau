@@ -4,13 +4,10 @@ type metadata = { [string]: unknown }
 
 local internal = {
     metadata = {} :: { [string]: { [string]: unknown } },
-    idToObj = {} :: { [string]: unknown },
-    objToId = {} :: { [unknown]: string },
+    registry = {} :: { [string]: unknown },
 }
 
-local Reflect = {
-    idToObj = internal.idToObj
-}
+local Reflect = {}
 
 local function hash(data: unknown): string
     local str = tostring(data)
@@ -22,22 +19,24 @@ local function hash(data: unknown): string
     return `reflect:{bit32.bxor(hash, 0)}`
 end
 
-function Reflect.getId(object: object, create: boolean?): string
-    local id = hash(object)
+function Reflect.getId(object: object): string
+    return hash(object)
+end
 
-    if internal.idToObj[id] == nil then
+function Reflect.register(object: object)
+    local id = Reflect.getId(object)
+    if internal.registry[id] == nil then
         local data = internal.metadata[id]
         internal.metadata[id] = if typeof(data) == "table" then data else {}
 
-        internal.idToObj[id] = object
-        internal.objToId[object] = id
+        internal.registry[id] = object
     end
-
-    return id :: any
 end
 
 function Reflect.getMetadata(object: object): metadata
-    local id = Reflect.getId(object, true)
+    Reflect.register(object)
+
+    local id = Reflect.getId(object)
     return internal.metadata[id]
 end
 
