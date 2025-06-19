@@ -1,0 +1,12 @@
+[package]
+name = "ratplier/proto"
+description = "a framework for everything roblox"
+version = "1.0.0-release"
+license = "MIT"
+authors = ["ratplier"]
+realm = "shared"
+registry = "https://github.com/UpliftGames/wally-index"
+repository = "https://github.com/ratplier/proto"
+exclude = ["sourcemap.json"]
+
+[dependencies]
