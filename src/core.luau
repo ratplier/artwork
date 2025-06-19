@@ -31,8 +31,6 @@ type extender =
 
 local internal = {
     singletons = {} :: { [string]: object },
-    components = {} :: { [string]: object },
-    instances = {} :: { [Instance]: set<string> },
 
     ignited = false,
     shutdown = false,
@@ -124,16 +122,6 @@ function Core.provider<T>(members: T & object, priority: number?): T
     Reflect.defineMetadata(members, "priority", _priority)
 
     internal.singletons[id] = members
-    return members
-end
-
-function Core.component<T>(members: T & object, tag: string?): T
-    local id = Reflect.getId(members)
-
-    Reflect.defineMetadata(members, "component", true)
-    Reflect.defineMetadata(members, "tag", tag)
-
-    internal.components[id] = table.clone(members)
     return members
 end
 
