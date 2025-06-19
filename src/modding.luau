@@ -26,7 +26,7 @@ local internal = {
 
 local Modding = {}
 
-function Modding.addListener(object: object)
+function Modding.addListener(object: object, ignoreList: { string }?)
 	if typeof(object) ~= "table" then return end
 
     local listener: listener = {
@@ -37,6 +37,7 @@ function Modding.addListener(object: object)
     for lifecycleEvent, callback in object do
 		if typeof(lifecycleEvent) ~= "string" then continue end
 		if typeof(callback) ~= "function" then continue end
+        if ignoreList and table.find(ignoreList, lifecycleEvent) then continue end
 		if listener.eventIds[lifecycleEvent] then continue end
 
 		local lifecycleListener = internal.lifecycleListeners[lifecycleEvent]
