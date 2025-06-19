@@ -20,7 +20,7 @@ local internal = {
     activeComponents = {} :: { [Instance]: { [component]: object } },
 
     componentAdded = Signal.new(),
-    componentRemoving = Signal.new(),
+    componentRemoved = Signal.new(),
 }
 
 local Component = {}
@@ -49,7 +49,7 @@ local function attachToTag(tag: string, component: component)
     end
 
     local addedConnection = CollectionService:GetInstanceAddedSignal(tag):Connect(instanceAdded)
-    local removingConnection = CollectionService:GetInstanceRemovedSignal(tag):Connect(instanceRemoved)
+    local removedConnection = CollectionService:GetInstanceRemovedSignal(tag):Connect(instanceRemoved)
 
     for _, instance in CollectionService:GetTagged(tag) do
         instanceAdded(instance)
@@ -57,7 +57,7 @@ local function attachToTag(tag: string, component: component)
 
     return function()
         addedConnection:Disconnect()
-        removingConnection:Disconnect()
+        removedConnection:Disconnect()
     end
 end
 
@@ -110,7 +110,7 @@ function Component.removeComponent(instance: Instance, component: component)
     internal.activeComponents[instance][component] = nil
     Modding.removeListener(object)
 
-    internal.componentRemoving:Fire(object, instance)
+    internal.componentRemoved:Fire(object, instance)
 end
 
 function Component.clearAllComponents(instance: Instance)
@@ -133,8 +133,8 @@ function Component.onComponentAdded(callback: (object: object, instance: Instanc
     return internal.componentAdded:Connect(callback)
 end
 
-function Component.onComponentRemoving(callback: (object: object, instance: Instance) -> ())
-    return internal.componentRemoving:Connect(callback)
+function Component.onComponentRemoved(callback: (object: object, instance: Instance) -> ())
+    return internal.componentRemoved:Connect(callback)
 end
 
 return Component
