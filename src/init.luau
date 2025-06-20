@@ -2,9 +2,9 @@ local core = require(script.core)
 local modding = require(script.modding)
 local signal = require(script.signal)
 
-local lib = core.extend(core, {
+local main = core.extend(core, {
     modding = modding,
-    signal = signal
+    signal = signal,
 })
 
-return lib
+return main
