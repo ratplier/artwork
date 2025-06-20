@@ -129,14 +129,6 @@ function Core.listen(name: string, listener: (...any) -> ())
     Modding.addLifecycleListener(name, listener)
 end
 
-Core.onInit = function(listener: () -> ()) Core.listen("onInit", listener) end
-Core.onStart = function(listener: () -> ()) Core.listen("onStart", listener) end
-Core.onStop = function(listener: () -> ()) Core.listen("onStop", listener) end
-
-Core.onRender = function(listener: (dt: number) -> ()) Core.listen("onRender", listener) end
-Core.onTick = function(listener: (dt: number) -> ()) Core.listen("onTick", listener) end
-Core.onPhysics = function(listener: (dt: number) -> ()) Core.listen("onPhysics", listener) end
-
 function Core.ignited()
 	return internal.ignited
 end
