@@ -1,6 +1,6 @@
 {
     "name": "artwork",
     "tree": {
-        "$path": "src"
+        "$path": "lib"
     }
 }
