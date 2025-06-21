@@ -1,0 +1,22 @@
+name = "ratplier/artwork"
+version = "1.0.0"
+description = "a framework for everything roblox"
+authors = ["ratplier"]
+repository = "https://github.com/ratplier/artwork"
+license = "MIT"
+includes = ["lib/**/*.luau", "pesde.toml", "LISENCE", "README.md"]
+
+[target]
+environment = "roblox"
+lib = "lib/init.luau"
+
+[indices]
+default = "https://github.com/pesde-pkg/index"
+
+[scripts]
+roblox_sync_config_generator = ".pesde/scripts/roblox_sync_config_generator.luau"
+sourcemap_generator = ".pesde/scripts/sourcemap_generator.luau"
+
+[dev_dependencies]
+scripts = { name = "pesde/scripts_rojo", version = "^0.1.0", target = "lune" }
+rojo = { name = "pesde/rojo", version = "^7.4.4", target = "lune" }
