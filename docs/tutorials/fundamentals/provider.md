@@ -14,7 +14,7 @@ end
 To register a provider, you can use the `artwork.register` function:
 register a object for listening to lifecycles
 ```luau
-artwork.register(members: object<T>, priority: number?): T
+return artwork.register(provider, 1)
 ```
 
 The priority of a provider is used to determine the order in which the providers are registered.
