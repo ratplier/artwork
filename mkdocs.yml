@@ -2,6 +2,7 @@ site_name: artwork
 site_description: 'a framework for everything roblox'
 docs_dir: docs/
 repo_url: 'https://github.com/ratplier/artwork'
+site_url: 'https://ratplier.github.io/artwork/'
 
 markdown_extensions:
   - attr_list
