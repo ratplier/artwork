@@ -114,7 +114,7 @@ function Core.loadChildren(parent: Instance, predicate: predicate<Instance>?)
     end)
 end
 
-function Core.provider<T>(members: T & object, priority: number?): T
+function Core.register<T>(members: T & object, priority: number?): T
     local id = Reflect.getId(members)
     local _priority = if typeof(priority) == "number" then priority else DEFAULT_PRIORITY
 
