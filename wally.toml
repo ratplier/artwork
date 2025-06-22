@@ -6,6 +6,7 @@ license = "MIT"
 authors = ["ratplier"]
 realm = "shared"
 repository = "https://github.com/ratplier/artwork"
+registry = "https://github.com/upliftgames/wally-index"
 includes = ["lib/**/*.luau", "pesde.toml", "LISENCE", "README.md"]
 
 [dependencies]
