@@ -35,4 +35,4 @@ function provider.onInit()
     end)
 end
 
-return Core.provider(provider)
+return Core.register(provider)
