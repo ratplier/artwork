@@ -7,4 +7,20 @@ local main = core.extend(core, {
     signal = signal,
 })
 
-return main
+local components = script.components 
+local networking = script.networking
+local lifecycles = script.lifecycles
+
+local external = {
+    component = require(components.component),
+    net = require(networking.net),
+    lifecycle = require(lifecycles.lifecycles),
+    lifecyclePresets = require(lifecycles.bundle),
+}
+
+local extras = main:extend({
+    net = external.net,
+    lifecycle = external.lifecyclePresets,
+}, external.lifecycle, external.component)
+
+return extras
