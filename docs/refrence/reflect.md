@@ -47,7 +47,7 @@ print("Is Admin:", isAdmin)
 ```
 
 #### Reflect.getMetadata
-Retrieves the entire metadata table for a given object. This is useful if you need to read multiple metadata keys at once. If the object has no metadata, an empty table is created and returned for it.
+Retrieves the entire metadata table for a given object. This is useful if you need to read multiple metadata keys at once. If the object has no metadata, it will be registered automatically.
 
 ```lua
 function Reflect.getMetadata(object: object): metadata
@@ -62,8 +62,6 @@ function Reflect.getMetadata(object: object): metadata
 - (`table`): The complete metadata table for the object. Changes to this table will be persisted.
 
 ```lua
-local player = --[[ same player object from the previous example ]]
-
 -- Get the whole metadata container
 local allMeta = Reflect.getMetadata(player)
 
@@ -78,7 +76,7 @@ print(Reflect.readMetadata(player, "NewValue")) -- > hello
 #### Reflect.register
 Explicitly registers an object with the Reflect API, preparing it for metadata storage.
 
-**Note:** In normal usage, you do not need to call this function. `defineMetadata` and `getMetadata` will call it automatically. It's provided for edge cases where you might want to pre-register a batch of objects.
+> [Note] In normal usage, you do not need to call this function. `defineMetadata` and `getMetadata` will call it automatically. It's provided for edge cases where you might want to pre-register a batch of objects.
 
 ```lua
 function Reflect.register(object: object)
