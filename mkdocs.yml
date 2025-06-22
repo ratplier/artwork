@@ -4,6 +4,35 @@ docs_dir: docs/
 repo_url: 'https://github.com/ratplier/artwork'
 site_url: 'https://ratplier.github.io/artwork/'
 
+theme:
+  name: 'material'
+  font:
+    text: Roboto
+    code: Roboto Mono
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default 
+      toggle:
+        icon: material/brightness-7
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: blue
+      accent: light-blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to dark mode
+  features:
+    - navigation.tabs          # Use tabs for top-level navigation
+    - navigation.sections      # Group pages into sections in the sidebar
+    - navigation.instant       # Load pages instantly without full reloads
+    - navigation.top           # Add a "Back to top" button
+    - search.suggest           # Show search suggestions as you type
+    - search.highlight         # Highlight search terms on the page
+    - content.tabs.link        # Linkable content tabs
+    - content.code.annotate    # Add annotations to code blocks
+    - content.code.copy        # Add a "copy to clipboard" button to code blocks
+
 markdown_extensions:
   - attr_list
   - pymdownx.emoji:
@@ -16,18 +45,6 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
-
-theme:
-  name: 'material'
-  features:
-    - content.code.copy
-    - content.code.select
-    - content.code.annotate # 
-  palette:
-    scheme: slate
-    primary: green
-    accent: green
-  
 extra:
   social:
     - icon: fontawesome/brands/github  # Example GitHub link
