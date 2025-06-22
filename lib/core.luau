@@ -126,7 +126,7 @@ function Core.register<T>(members: T & object, priority: number?): T
 end
 
 function Core.listen(name: string, listener: (...any) -> ())
-    Modding.addLifecycleListener(name, listener)
+    return Modding.addLifecycleListener(name, listener)
 end
 
 function Core.ignited()
