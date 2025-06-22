@@ -10,5 +10,5 @@ The bare minimal example of a provider <!-- , which can listen to any [lifecycle
 local artwork = require("@packages/artwork")
 
 local provider = {}
-artwork.register(provider) --(1)!
+artwork.register(provider)
 ```

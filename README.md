@@ -10,7 +10,7 @@ api and syntax inspired by flamework and oh-my-prvd
 local artwork = require("@packages/artwork")
 
 local provider = {}
-artwork.register(provider) --(1)!
+artwork.register(provider)
 ```
 
 ### example
