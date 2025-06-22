@@ -1,6 +1,7 @@
 site_name: artwork
-site_url: https://ratplier.github.io/artwork
-repo_url: https://github.com/ratplier/artwork
+site_description: 'a framework for everything roblox'
+docs_dir: docs/
+repo_url: 'https://github.com/ratplier/artwork'
 
 markdown_extensions:
   - attr_list
@@ -16,7 +17,7 @@ markdown_extensions:
   - pymdownx.superfences
 
 theme:
-  name: material
+  name: 'material'
   features:
     - content.code.copy
     - content.code.select
