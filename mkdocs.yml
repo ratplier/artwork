@@ -1,0 +1,32 @@
+site_name: artwork
+site_url: https://ratplier.github.io/artwork
+repo_url: https://github.com/ratplier/artwork
+
+markdown_extensions:
+  - attr_list
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+
+theme:
+  name: material
+  features:
+    - content.code.copy
+    - content.code.select
+    - content.code.annotate # 
+  palette:
+    scheme: slate
+    primary: green
+    accent: green
+  
+extra:
+  social:
+    - icon: fontawesome/brands/github  # Example GitHub link
+      link: https://github.com/ratplier
