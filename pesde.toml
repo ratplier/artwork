@@ -4,7 +4,7 @@ description = "a framework for everything roblox"
 authors = ["ratplier"]
 repository = "https://github.com/ratplier/artwork"
 license = "MIT"
-includes = ["lib/**/*.luau", "pesde.toml", "LISENCE", "README.md"]
+includes = ["lib/**/*.luau", "pesde.toml", "LISENCE", "README.md", "docs/**/*.md"]
 
 [target]
 environment = "roblox"
