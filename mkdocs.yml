@@ -1,11 +1,14 @@
 site_name: artwork
 site_description: 'a framework for everything roblox'
 docs_dir: docs/
+repo_name: ratplier/artwork
 repo_url: 'https://github.com/ratplier/artwork'
 site_url: 'https://ratplier.github.io/artwork/'
 
 theme:
   name: material
+  logo: assets/logo.png
+  favicon: assets/favicon.png
   palette:
     - media: "(prefers-color-scheme: dark)"
       scheme: artwork-dark
