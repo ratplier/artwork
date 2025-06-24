@@ -2,7 +2,7 @@
 the framework for everything roblox  
 made with love by [@ratplier](https://github.com/ratplier)
 
-api and syntax inspired by flamework and oh-my-prvd
+api and syntax inspired by flamework and prvd-m-wrong
 (https://ratplier.github.io/artwork)
 
 ### boilerplate
