@@ -1,0 +1,97 @@
+:root {
+  --dark-background-300: #464356;
+  --dark-background: #1e1d25;
+  --dark-background-1000: #22202b;
+  
+  --dark-text: #f2e5ff;
+  --dark-primary: #acadd2;
+  --dark-secondary-300: #8888dd;
+
+  --dark-accent-100: #d9dcf2;
+  --dark-accent-200: #b4b9e4;
+  --dark-accent-400: #6873ca;
+  
+  --light-background-200: #f1f1f4;
+  --light-background: #edebf5;
+  
+  --light-text: #0d001a;
+  --light-primary: #2d2e53;
+  --light-secondary-300: #8888dd;
+
+  --light-accent-100: #d9dcf2;
+  --light-accent-200: #b4b9e4;
+  --light-accent-300: #8e96d7;
+}
+
+[data-md-color-scheme="artwork-light"] {
+  /* Header Colors */
+  --md-primary-fg-color: var(--light-background);
+  --md-default-fg-color: var(--light-text);
+  --md-default-fg-color--light: var(--light-primary);
+  --md-default-fg-color--lighter: var(--light-text);
+  --md-primary-fg-color--dark:  var(--light-background);
+
+  --md-primary-bg-color: var(--light-primary);
+  --md-default-bg-color: var(--light-background);
+
+  /* Code Colors (not yet) */
+
+  /* Typeset Colors */
+  --md-typeset-color: var(--light-text);
+  --md-typeset-a-color: var(--dark-secondary-300);
+
+  /* Admonition Colors */
+  --md-admonition-fg-color: var(--light-text);
+  --md-admonition-bg-color: var(--light-background);
+
+  /* Footer Colors */
+  --md-footer-fg-color: var(--light-text);
+  --md-footer-fg-color--light: var(--light-text);
+  --md-footer-fg-color--lighter: var(--light-text);
+  --md-footer-bg-color: var(--light-background);
+  --md-footer-bg-color--dark: var(--light-background);
+}
+
+[data-md-color-scheme="artwork-dark"] {
+  /* Header Colors */
+  --md-primary-fg-color: var(--dark-background);
+  --md-default-fg-color: var(--dark-text);
+  --md-default-fg-color--light: var(--dark-accent-100);
+  --md-default-fg-color--lighter: var(--dark-text);
+  --md-primary-fg-color--dark:  var(--dark-accent-300);
+
+  --md-primary-bg-color: var(--dark-primary);
+  --md-default-bg-color: var(--dark-background);
+
+  /* Code Colors */
+  --md-code-fg-color: var(--dark-text-100);
+  --md-code-bg-color: var(--dark-background-1000);
+
+  /* Code Highlight Colors */
+  --md-code-hl-number-color: var(--dark-accent-200);
+  --md-code-hl-function-color: var(--dark-accent-200);
+  --md-code-hl-keyword-color: var(--dark-accent-400);
+  --md-code-hl-string-color: var(--dark-secondary-300);
+  --md-code-hl-name-color: var(--dark-text);
+  --md-code-hl-operator-color: var(--dark-text);
+  --md-code-hl-punctuation-color: var(--dark-text);
+  --md-code-hl-comment-color: var(--dark-background-300);
+  --md-code-hl-generic-color: var(--dark-text);
+  --md-code-hl-variable-color: var(--dark-text);
+
+  /* Typeset Colors */
+  --md-typeset-color: var(--dark-text);
+  --md-typeset-a-color: var(--dark-primary);
+
+  /* Admonition Colors */
+  --md-admonition-fg-color: var(--dark-text);
+  --md-admonition-bg-color: var(--dark-background);
+
+  /* Footer Colors */
+  --md-footer-fg-color: var(--dark-text);
+  --md-footer-fg-color--light: var(--dark-text);
+  --md-footer-fg-color--lighter: var(--dark-text);
+  --md-footer-bg-color: var(--dark-background);
+  --md-footer-bg-color--dark: var(--dark-background);
+}
+
