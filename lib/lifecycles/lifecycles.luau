@@ -16,7 +16,7 @@ end
 function lifecycles.createLifecycle(name: string, manager: (fire: () -> ()) -> ())
     local listeners = {}
 
-    local adddedConnection = Modding.onListenerAdded(function(listener) listeners[listener] = true end, name)
+    local addedConnection = Modding.onListenerAdded(function(listener) listeners[listener] = true end, name)
     local removedConnection = Modding.onListenerRemoved(function(listener) listeners[listener] = nil end, name)
 
     local function fire(...)
@@ -28,7 +28,7 @@ function lifecycles.createLifecycle(name: string, manager: (fire: () -> ()) -> (
     manager(fire)
 
     return function()
-        adddedConnection:Disconnect()
+        addedConnection:Disconnect()
         removedConnection:Disconnect()
     end
 end
