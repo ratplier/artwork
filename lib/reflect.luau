@@ -9,13 +9,17 @@ local internal = {
 
 local Reflect = {}
 
+local function tostring(data: unknown): string
+	return HttpService:JSONEncode(data)
+end
+
 local function hash(data: unknown): string
-    local str = tostring(data)
+	local str = tostring(data)
     local hash = 5381
-    for i = 1, #str do
-        local code = string.byte(str)
-		hash = bit32.lshift(hash, 5) + hash + code
-    end
+	for i = 1, #str do
+		local c = string.byte(str, i)
+		hash = (bit32.lshift(hash, 5) + hash) + c
+	end
     return `reflect:{bit32.bxor(hash, 0)}`
 end
 
