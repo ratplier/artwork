@@ -3,17 +3,17 @@ local RunService = game:GetService("RunService")
 local Modding = require("./modding")
 local lifecycles = {}
 
-function lifecycles.createClientLifecycle(name: string, manager: (fire: () -> ()) -> ())
+function lifecycles.createClientLifecycle(name: string, manager: (fire: () -> ()) -> (), passSelf: boolean?)
     if RunService:IsServer() then return end
-    return lifecycles.createLifecycle(name, manager)
+    return lifecycles.createLifecycle(name, manager, passSelf)
 end
 
-function lifecycles.createServerLifecycle(name: string, manager: (fire: () -> ()) -> ())
+function lifecycles.createServerLifecycle(name: string, manager: (fire: () -> ()) -> (), passSelf: boolean?)
     if not RunService:IsServer() then return end
-    return lifecycles.createLifecycle(name, manager)
+    return lifecycles.createLifecycle(name, manager, passSelf)
 end
 
-function lifecycles.createLifecycle(name: string, manager: (fire: () -> ()) -> ())
+function lifecycles.createLifecycle(name: string, manager: (fire: () -> ()) -> (), passSelf: boolean?)
     local listeners = {}
 
     local addedConnection = Modding.onListenerAdded(function(listener) listeners[listener] = true end, name)
@@ -21,7 +21,12 @@ function lifecycles.createLifecycle(name: string, manager: (fire: () -> ()) -> (
 
     local function fire(...)
         for listener in listeners do
-            task.spawn(listener[name], ...)
+            if passSelf then
+                task.spawn(listener[name], listener, ...)
+                listener[name](listener, ...)
+            else
+                task.spawn(listener[name], ...)
+            end
         end
     end
 
