@@ -27,7 +27,9 @@ local internal = {
 local Modding = {}
 
 function Modding.addListener(object: object, ignoreList: { string }?)
-	if typeof(object) ~= "table" then return end
+	if typeof(object) ~= "table" then
+        error("[artwork.Modding]: object must be a table", 2)
+    end
 
     local listener: listener = {
         eventIds = {},
@@ -62,7 +64,9 @@ end
 
 function Modding.removeListener(object: object)
     local listener = internal.listeners[object]
-    if not listener then return end
+    if not listener then
+        error("[artwork.Modding]: given object is not a listener", 2)
+    end
 
     for _, set in listener.involvement do
         set[object] = nil
@@ -89,9 +93,11 @@ function Modding.addLifecycleListener(name: string, callback: (...any) -> ())
     end
 end
 
-function Modding.getListeners(id: string): { object }?
+function Modding.getListeners(id: string): { object }
     local listeners = internal.lifecycleListeners[id]
-    if not listeners then return end
+    if not listeners then
+        error("[artwork.Modding]: no listeners found for " .. id, 2)
+    end
 
     local results = {}
     for listener in listeners do
