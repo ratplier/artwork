@@ -1,4 +1,7 @@
 --!strict
+--networking library
+--by @ratplier
+
 local RunService = game:GetService("RunService")
 
 local IS_CLIENT = RunService:IsClient()
@@ -7,16 +10,18 @@ local IS_SERVER = RunService:IsServer()
 local packets = {}
 local invokeListeners = {}
 
-type callback<A...=(), R...=()> = (A...) -> (R...)
-type queueItem<A...=...any> = {
+type callback<A...=(), R...=()> = (A...) -> R...
+type queueItem<A...=...any, R...=...any> = {
 	resolved: callback<(A...), (A...)>,
-	rejected: callback<(string), (string)>,
+	rejected: callback<(R...), (R...)>,
+	nextResolved: callback<(A...), (A...)>,
+	nextRejected: callback<(R...), (R...)>,
 }
-type Promise<T...=()> = {
-	after: (onResolve: callback<T...>?, onReject: callback<string>?) -> Promise<T...>,
-	catch: (onReject: callback<string>?) -> Promise<T...>,
-	finally: (callback<()>) -> Promise<T...>,
-	await: () -> T...,
+export type Promise<T...=(), R...=()> = {
+	after: (onResolve: callback<T...>?, onReject: callback<R...>?) -> Promise<T..., R...>,
+	catch: (onReject: callback<R...>?) -> Promise<T..., R...>,
+	finally: (finally: callback) -> Promise<T..., R...>,
+	await: () -> (boolean, T...)
 }
 
 type Disconnect = () -> ()
@@ -34,8 +39,8 @@ type Signal<A...> = {
 }
 
 type middlewareChain<T...> = {
-    add: (fn: middleware<T...>) -> (),
-    execute: (T...) -> ...any
+	add: (fn: middleware<T...>) -> (),
+	execute: (T...) -> ...any
 }
 
 type kind = "event" | "function"
@@ -69,7 +74,7 @@ export type serverRemote<A...> = {
 	fireAllClients: callback<A...>,
 }
 export type clientAsyncRemote<A..., R...> = {
-	invoke: callback<(A...), (Promise<R...>)>,
+	invoke: callback<(A...), (Promise<R..., (string)>)>,
 }
 export type serverAsyncRemote<A..., R...> = {
 	handle: callback< callback<(Player, A...), (R...)>, Disconnect >,
@@ -90,20 +95,16 @@ local function deepCopy<T>(tbl: T): T
 	return result::any
 end
 
-local function getremotes(): { reliable: RemoteEvent, unreliable: UnreliableRemoteEvent, callback: RemoteFunction }
-	local remotes = {
-		reliable = script:FindFirstChildOfClass("RemoteEvent"),
-		unreliable = script:FindFirstChildOfClass("UnreliableRemoteEvent"),
-		callback = script:FindFirstChildOfClass("RemoteFunction"),
-	}
+type remotes = { reliable: RemoteEvent, unreliable: UnreliableRemoteEvent, callback: RemoteFunction }
+local function getremotes(): remotes
+	local remotes = {}
 
 	if IS_CLIENT then
-		while not remotes.reliable or not remotes.unreliable or not remotes.callback do
+		repeat task.wait()
 			remotes.reliable = script:FindFirstChildOfClass("RemoteEvent")
 			remotes.unreliable = script:FindFirstChildOfClass("UnreliableRemoteEvent")
 			remotes.callback = script:FindFirstChildOfClass("RemoteFunction")
-			task.wait()
-		end
+		until remotes.reliable and remotes.unreliable and remotes.callback
 	else
 		local names = {"reliable", "unreliable", "callback"}
 		for _, name in names do
@@ -117,7 +118,7 @@ local function getremotes(): { reliable: RemoteEvent, unreliable: UnreliableRemo
 		end
 	end
 
-	return remotes
+	return remotes :: remotes
 end
 
 local function validate(validators: { validator }, ...: any): boolean
@@ -131,31 +132,31 @@ local function validate(validators: { validator }, ...: any): boolean
 end
 
 local function middleware<T...>(): middlewareChain<T...>
-    local middlewareStack = {}
+	local middlewareStack = {}
 
-    local function add(fn: middleware<T...>)
-        table.insert(middlewareStack, fn)
-    end
+	local function add(fn: middleware<T...>)
+		table.insert(middlewareStack, fn)
+	end
 
-    local function execute(...)
-        local index = 0
+	local function execute(...)
+		local index = 0
 
-        local function next(...)
-            index += 1
-            if middlewareStack[index] then
-                return middlewareStack[index](next, ...)
-            else
-                return ...
-            end
-        end
+		local function next(...)
+			index += 1
+			if middlewareStack[index] then
+				return middlewareStack[index](next, ...)
+			else
+				return ...
+			end
+		end
 
-        return next(...)
-    end
+		return next(...)
+	end
 
-    return {
-        add = add,
-        execute = execute
-    }
+	return {
+		add = add,
+		execute = execute
+	}
 end
 
 local function pack(...)
@@ -238,7 +239,7 @@ local function compactSignal<A...>(): Signal<A...>
 		return disconnect
 	end
 
-	local function fire(...: A...)
+	local function fire(...)
 		for _, listener in ipairs(table.clone(listeners)) do
 			task.spawn(listener, ...)
 		end
@@ -261,36 +262,41 @@ local function compactSignal<A...>(): Signal<A...>
 	end
 
 	return {
-        connect = connect,
-        once = once,
-        fire = fire,
-        bind = bind,
-        wrap = wrap,
-        sandbox = sandbox
-    }
+		connect = connect,
+		once = once,
+		fire = fire,
+		bind = bind,
+		wrap = wrap,
+		sandbox = sandbox
+	}
 end
 
-local function compactPromise<A...>(executor: callback< callback<A...>, callback<string> >): Promise<A...>
+local function compactPromise<A..., R...>(executor: (resolve: callback<A...>, reject: callback<R...>) -> ()): Promise<A..., R...>
 	type state = "pending" | "resolved" | "rejected"
-	
-	local noop = function(...) return ... end
-	
+
 	local state = "pending"
 	local result = {}
 	local queue = {}
 
 	local function process()
-		if state == "pending" then
-			return
-		end
-		local length = #queue
-		for i = 1, length do
-			local exe = queue[i]
-			local callback = state == "resolved" and exe.resolved or exe.rejected
-			
-			pcall(callback, unpack(result))
-		end
+		if state == "pending" then return end
+
+		local promises = queue :: { queueItem }
 		queue = {}
+
+		for _, promise in promises do
+			local nextResolve = promise.nextResolved
+			local nextReject = promise.nextRejected
+
+			if state == "resolved" then
+				nextResolve( unpack(result) )
+			else
+				nextReject( unpack(result) )
+			end
+
+			local callback = if state == "resolved" then nextResolve else nextReject
+			task.spawn(pcall, callback, unpack(result))
+		end
 	end
 
 	local function resolve(...)
@@ -302,49 +308,40 @@ local function compactPromise<A...>(executor: callback< callback<A...>, callback
 		process()
 	end
 
-	local function reject(err: string)
+	local function reject(...)
 		if state ~= "pending" then
 			return
 		end
 		state = "rejected"
-		result = { err }
+		result = { ... }
 		process()
 	end
 
-	local function andThen<A...>(onResolve: callback<A...>?, onReject: callback<string>?): Promise<A...>
-		local resolve: callback<A...> = if type(onResolve) == "function" then onResolve else noop
-		local reject: callback<string> = if type(onReject) == "function" then onReject else noop
+	local function andThen<A...>(onResolve: callback<A...>? , onReject: callback<R...>?): any
 		return compactPromise(function(nextResolve, nextReject)
-			local nextItem: queueItem<A...> = {
-				resolved = function(...)
-                    resolve(...)
-                    nextResolve(...)
-                    return ...
-                end,
-				rejected = function(err)
-                    reject(err)
-                    nextReject(err)
-                    return err
-                end,
-			}
-			
-			table.insert(queue, nextItem)
-			
+			table.insert(queue, {
+				resolved = onResolve,
+				rejected = onReject,
+
+				nextResolved = nextResolve,
+				nextRejected = nextReject,
+			})
+
 			if state ~= "pending" then
 				process()
 			end
 		end)
 	end
-	
-	local function after(onResolve: callback<A...>?, onReject: callback<string>?): Promise<A...>
+
+	local function after(onResolve: callback<A...>?, onReject: callback<R...>?): Promise<A...>
 		return andThen(onResolve, onReject)
 	end
-	
+
 	local function catch(onReject): Promise<A...>
 		return andThen(nil, onReject)
 	end
 
-	local function finally(onFinally: callback<...any>): Promise<A...>
+	local function finally(onFinally): Promise<A...>
 		return andThen(onFinally, onFinally)
 	end
 
@@ -365,7 +362,7 @@ local function compactPromise<A...>(executor: callback< callback<A...>, callback
 		catch = catch,
 		finally = finally,
 		await = await,
-	}
+	} :: any
 end
 
 local function packet<A..., R...>(id: any, ...: A...): packet<A..., R...>
@@ -375,7 +372,7 @@ local function packet<A..., R...>(id: any, ...: A...): packet<A..., R...>
 
 	local metadata: metadata<A...> = {
 		validators = pack(...),
-        middleware = middleware(),
+		middleware = middleware(),
 		returns = {},
 		unreliable = false,
 		kind = "event",
@@ -397,17 +394,17 @@ local function packet<A..., R...>(id: any, ...: A...): packet<A..., R...>
 	end
 
 	function self.middleware(...)
-        for _, fn in {...} do
-            metadata.middleware.add(fn)
-        end
+		for _, fn in {...} do
+			metadata.middleware.add(fn)
+		end
 		return self
 	end
 
 	function self.metadata()
 		return table.freeze(deepCopy(metadata))
 	end
-	
-	return self
+
+	return self :: packet<A..., R...>
 end
 
 local function namespace<T>(t: T): T
@@ -419,7 +416,7 @@ local remotes = getremotes()
 if IS_SERVER then
 	remotes.callback.OnServerInvoke = function(player, id, ...)
 		local data = invokeListeners[id]
-		if not data then return end
+		if data == nil then return end
 		if not data.validate(...) then return end
 
 		local results = {data.middleware.execute(player, ...)}
@@ -432,7 +429,7 @@ local function clientRemote<A...>(packetBuilder: packet<A..., ()>): clientRemote
 	local signal = compactSignal()
 	local data = packetBuilder.metadata()
 	local event = (data.unreliable and remotes.unreliable or remotes.reliable) :: RemoteEvent
-	
+
 	signal.bind(event.OnClientEvent)
 
 	local function handleConnection(fn, id, ...)
@@ -441,11 +438,11 @@ local function clientRemote<A...>(packetBuilder: packet<A..., ()>): clientRemote
 		fn( data.middleware.execute(...) )
 	end
 
-	local function connect(fn: callback<A...>): Disconnect
+	local function connect(fn): Disconnect
 		return signal.connect(function(...) handleConnection(fn, ...) end)
 	end
 
-	local function once(fn: callback<A...>): Disconnect
+	local function once(fn): Disconnect
 		local disconnect: Disconnect
 		disconnect = signal.connect(function(...)
 			if disconnect then disconnect() end
@@ -454,15 +451,15 @@ local function clientRemote<A...>(packetBuilder: packet<A..., ()>): clientRemote
 		return disconnect
 	end
 
-    local function fire(...: A...)
-        event:FireServer(data.id, ...)
-    end
+	local function fire(...: A...)
+		event:FireServer(data.id, ...)
+	end
 
 	return {
 		connect = connect,
 		once = once,
 		fire = fire,
-	}
+	} :: clientRemote<A...>
 end
 
 local function serverRemote<A...>(packetBuilder: packet<A..., ()>): serverRemote<A...>
@@ -470,7 +467,7 @@ local function serverRemote<A...>(packetBuilder: packet<A..., ()>): serverRemote
 	local signal = compactSignal()
 	local data = packetBuilder.metadata()
 	local event = (data.unreliable and remotes.unreliable or remotes.reliable) :: RemoteEvent
-	
+
 	signal.bind(event.OnServerEvent)
 
 	local function handleConnection(fn, player, id, ...: any)
@@ -479,13 +476,13 @@ local function serverRemote<A...>(packetBuilder: packet<A..., ()>): serverRemote
 		fn( player, data.middleware.execute(...) )
 	end
 
-	local function connect(fn: callback<(Player, A...)>): Disconnect
+	local function connect(fn): Disconnect
 		return signal.connect(function(...) handleConnection(fn, ...) end)
 	end
-	
-	local function once(fn: callback<(Player, A...)>): Disconnect
+
+	local function once(fn): Disconnect
 		local disconnect: Disconnect
-		disconnect = signal.connect(function(...)
+		disconnect = signal.connect(function(...: any)
 			handleConnection(fn, ...)
 			if disconnect then disconnect() end
 		end)
@@ -505,22 +502,25 @@ local function serverRemote<A...>(packetBuilder: packet<A..., ()>): serverRemote
 		once = once,
 		fireClient = fireClient,
 		fireAllClients = fireAllClients,
-	}
+	} :: serverRemote<A...>
 end
 
 local function clientAsync<A..., R...>(packetBuilder: packet<A..., R...>): clientAsyncRemote<A..., R...>
 	assert(IS_CLIENT, "Cannot build client remote from server")
 	local data = packetBuilder.metadata()
 	local event = remotes.callback
-	
-	local function invoke(...: A...): Promise<R...>
-        local args = pack(...)
-        return compactPromise(function(resolve, reject)
-            local result = { event:InvokeServer(data.id, unpack(args)) }
-            if not validate(data.returns, unpack(result)) then return end
-            resolve(unpack(result))
-        end)
-    end
+
+	local function invoke(...: A...)
+		local args = pack(...)
+		return compactPromise(function(resolve, reject)
+			local result = { event:InvokeServer(data.id, unpack(args)) }
+			if not validate(data.returns, unpack(result)) then
+				reject("Invalid return values from server")
+			else
+				resolve(unpack(result))
+			end
+		end) :: Promise<R..., (string)>
+	end
 
 	return {
 		invoke = invoke,
@@ -530,30 +530,30 @@ end
 local function serverAsync<A..., R...>(packetBuilder: packet<A..., R...>): serverAsyncRemote<A..., R...>
 	assert(IS_SERVER, "Cannot build server remote from client")
 	local data = packetBuilder.metadata()
-    local function handle(listener: callback<(Player, A...), (R...)>): Disconnect
-        invokeListeners[data.id] = {
-            middleware = data.middleware,
-            validate = function(...) return validate(data.validators, ...) end,
-            listener = listener,
-        }
-        return function() invokeListeners[data.id] = nil end
-    end
-    
-    return {
-        handle = handle,
-    }
+	local function handle(listener: (player: Player, A...) -> R...): Disconnect
+		invokeListeners[data.id] = {
+			middleware = data.middleware,
+			validate = function(...) return validate(data.validators, ...) end,
+			listener = listener :: any,
+		}
+		return function() invokeListeners[data.id] = nil end
+	end
+
+	return {
+		handle = handle,
+	} :: serverAsyncRemote<A..., R...>
 end
 
 local function buildRemoteEvent<A...>(packetBuilder: packet<A...>): remoteEvent<A...>
 	local data = packetBuilder.metadata()
 	local remote: any
-	
+
 	if data.kind == "event" and IS_CLIENT then
 		remote = clientRemote(packetBuilder)
 	elseif data.kind == "event" and IS_SERVER then
 		remote = serverRemote(packetBuilder)
 	end
-	
+
 	return remote
 end
 
@@ -574,24 +574,24 @@ local function buildRemote<A..., R...>(packetBuilder: packet<A...> & packet<A...
 	local data = packetBuilder.metadata()
 	local remote: any
 
-    if data.kind == "event" then
-        remote = buildRemoteEvent(packetBuilder)
-    elseif data.kind == "function" then
-        remote = buildRemoteFunction(packetBuilder)
-    end
-	
+	if data.kind == "event" then
+		remote = buildRemoteEvent(packetBuilder)
+	elseif data.kind == "function" then
+		remote = buildRemoteFunction(packetBuilder)
+	end
+
 	return remote
 end
 
 local function ratelimit(rate: number, timePeriod: number)
-    local count = 0
-	return function(next, player: Player, ...)
-        if count >= rate then return end
-        count += 1
-        task.delay(timePeriod, function()
-            count -= 1
-        end)
-        return next(player, ...)
+	local count = 0
+	return function(next, ...)
+		if count >= rate then return end
+		count += 1
+		task.delay(timePeriod, function()
+			count -= 1
+		end)
+		return next(...)
 	end
 end
 
@@ -603,8 +603,8 @@ return {
 	serverAsync = serverAsync,
 
 	build = buildRemote,
-    buildEvent = buildRemoteEvent,
-    buildFunction = buildRemoteFunction,
+	buildEvent = buildRemoteEvent,
+	buildFunction = buildRemoteFunction,
 	packet = packet,
 	namespace = namespace,
 
