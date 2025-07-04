@@ -64,7 +64,7 @@ local function attachToTag(tag: string, component: component)
     end
 end
 
-function Component.registerComponent<T>(members: T & object, tag: string?): component<T>
+function Component.component<T>(members: T & object, tag: string?): component<T>
     local component = {
         tag = tag,
         members = members
