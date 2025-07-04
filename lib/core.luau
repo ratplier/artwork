@@ -6,9 +6,9 @@ type object = { [any]: any }
 type set<T> = { [T]: true }
 type predicate<T> = (T) -> boolean
 
-type onStart = object & { onStart: () -> () }
-type onInit = object & { onInit: () -> () }
-type onStop = object & { onStop: () -> () }
+type onStart = object & { onStart: (self: onStart) -> () }
+type onInit = object & { onInit: (self: onInit) -> () }
+type onStop = object & { onStop: (self: onStop) -> () }
 
 type extender =
     & (<A>(A) -> A)
@@ -160,20 +160,20 @@ function Core.ignite()
 	for _, listener in init do
 		xpcall(listener.onInit, function(result)
 			warn(`[artwork]: Error in onInit listener: {result}`)
-		end)
+		end, listener)
 	end
 
 	internal.ignited = true
 
 	for _, listener in start do
-		task.spawn(listener.onStart)
+		task.spawn(listener.onStart, listener)
 	end
 
 	return function()
 		if Core.shutdown() then return end
 
 		for _, listener in stop do
-			task.spawn(listener.onStop)
+			task.spawn(listener.onStop, listener)
 		end
 
 		internal.shutdown = true
