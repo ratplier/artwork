@@ -1,6 +1,6 @@
 local RunService = game:GetService("RunService")
 
-local Modding = require("../modding")
+local Modding = require("./modding")
 local lifecycles = {}
 
 function lifecycles.createClientLifecycle(name: string, manager: (fire: () -> ()) -> ())
