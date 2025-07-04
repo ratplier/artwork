@@ -37,7 +37,10 @@ local function registerInstance(instance: Instance)
 end
 
 local function attachToTag(tag: string, component: component)
-    if internal.attachedTags[tag] then return end
+    if internal.attachedTags[tag] then
+        error("[artwork.Component]: tag already in use: " .. tag, 2)
+    end
+    
     internal.attachedTags[tag] = true
 
     local function instanceAdded(instance: Instance)
@@ -78,8 +81,8 @@ end
 
 function Component.addComponent(instance: Instance, component: component)
     if internal.activeComponents[instance] and internal.activeComponents[instance][component] then return end
-    if typeof(instance) ~= "Instance" then return end
-
+    assert(typeof(instance) == "Instance", `[artwork.Component]: expected Instance, got {typeof(instance)}`)
+    
     registerInstance(instance)
 
     local object = constructComponent(instance, component)
@@ -97,8 +100,8 @@ end
 
 function Component.removeComponent(instance: Instance, component: component)
     if not internal.activeComponents[instance] or not internal.activeComponents[instance][component] then return end
-    if typeof(instance) ~= "Instance" then return end
-
+    assert(typeof(instance) == "Instance", `[artwork.Component]: expected Instance, got {typeof(instance)}`)
+    
     local object = internal.activeComponents[instance][component]
     local objectId = Reflect.getId(object)
     
