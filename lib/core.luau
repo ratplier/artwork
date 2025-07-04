@@ -8,12 +8,12 @@ type object = { [any]: any }
 type set<T> = { [T]: true }
 type predicate<T> = (T) -> boolean
 
-type onStart = object & { onStart: (self: object) -> () }
-type onInit = object & { onInit: (self: object) -> () }
-type onStop = object & { onStop: (self: object) -> () }
-type onRender = object & { onRender: (self: object, dt: number) -> () }
-type onTick = object & { onTick: (self: object, dt: number) -> () }
-type onPhysics = object & { onPhysics: (self: object, dt: number) -> () }
+type onStart = object & { onStart: () -> () }
+type onInit = object & { onInit: () -> () }
+type onStop = object & { onStop: () -> () }
+type onRender = object & { onRender: (dt: number) -> () }
+type onTick = object & { onTick: (dt: number) -> () }
+type onPhysics = object & { onPhysics: (dt: number) -> () }
 
 type extender =
     & (<A>(A) -> A)
@@ -171,18 +171,6 @@ function Core.ignite()
 	local init: { onInit } = {}
 	local stop: { onStop } = {}
 
-	local update: set<onTick> = {}
-	local render: set<onRender> = {}
-	local physics: set<onPhysics> = {}
-
-	Modding.onListenerAdded(function(provider) update[provider::onTick] = true end, "onTick")
-	Modding.onListenerAdded(function(provider) render[provider::onRender] = true end, "onRender")
-	Modding.onListenerAdded(function(provider) physics[provider::onPhysics] = true end, "onPhysics")
-
-	Modding.onListenerRemoved(function(provider) update[provider::onTick] = nil end, "onTick")
-	Modding.onListenerRemoved(function(provider) render[provider::onRender] = nil end, "onRender")
-	Modding.onListenerRemoved(function(provider) physics[provider::onPhysics] = nil end, "onPhysics")
-	
 	Modding.onListenerAdded(function(provider)
 		local index = table.find(stop, provider::onStop)
 		if index then return end
@@ -213,41 +201,14 @@ function Core.ignite()
 	end, "onStart"):Disconnect()
 
 	for _, object in init do
-		object:onInit()
+		object.onInit()
 	end
 	
-	local onTickConnection = RunService.Heartbeat:Connect(function(...)
-		for object in update do
-			task.spawn(object.onTick, object, ...)
-		end
-	end)
-
-	local onPhysicsConnection = RunService.PreSimulation:Connect(function(...)
-		for object in physics do
-			task.spawn(object.onPhysics, object, ...)
-		end
-	end)
-
-	local onRenderConnection
-	if RunService:IsClient() then
-		onRenderConnection = RunService.RenderStepped:Connect(function(...)
-			for object in render do
-				task.spawn(object.onRender, object, ...)
-			end
-		end)
-	end
-
 	internal.ignited = true
 
 	for _, object in start do
-		task.spawn(object.onStart, object)
+		task.spawn(object.onStart)
 	end
-
-	Modding.addLifecycleListener("onStop", function()
-		onTickConnection:Disconnect()
-		onPhysicsConnection:Disconnect()
-		if onRenderConnection then onRenderConnection:Disconnect() end
-	end)
 
 	return function()
 		if Core.shutdown() then return end
@@ -256,7 +217,7 @@ function Core.ignite()
 			local object = stop[i]
 			table.remove(stop, i)
 			
-			task.spawn(object.onStop, object)
+			task.spawn(object.onStop)
 		end
 
 		internal.shutdown = true
