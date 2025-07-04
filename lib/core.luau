@@ -1,6 +1,4 @@
 --!strict
-local RunService = game:GetService("RunService")
-
 local Modding = require("./modding")
 local Reflect = require("./reflect")
 
@@ -11,9 +9,6 @@ type predicate<T> = (T) -> boolean
 type onStart = object & { onStart: () -> () }
 type onInit = object & { onInit: () -> () }
 type onStop = object & { onStop: () -> () }
-type onRender = object & { onRender: (dt: number) -> () }
-type onTick = object & { onTick: (dt: number) -> () }
-type onPhysics = object & { onPhysics: (dt: number) -> () }
 
 type extender =
     & (<A>(A) -> A)
@@ -42,14 +37,6 @@ local Core = {}
 local function saferequire(module: ModuleScript): unknown
     local success, result = pcall(require, module)
     return success and result
-end
-
-local function map<T, R>(tbl: { T }, callback: (T) -> (R)): { R }
-    local result = {}
-    for _, value in tbl do
-        table.insert(result, callback(value))
-    end
-    return result
 end
 
 local function extend(...)
@@ -94,10 +81,6 @@ local function topologicalSort(objects: { string }): { [string]: number }
     return sorted
 end
 
-local function implements(object, id)
-    return typeof(object[id]) == "function"
-end
-
 function Core.loadDescendants(parent: Instance, predicate: predicate<Instance>?)
     for _, descendant in parent:GetDescendants() do
         if predicate and not predicate(descendant) then continue end
@@ -140,84 +123,57 @@ end
 function Core.ignite()
 	if Core.ignited() or Core.shutdown() then return end
 
-	local metadata: { { id: string, priority: number, provider: object } } = {}
+	local providerIds: { string } = {}
+	local metadata: { [string]: { id: string, priority: number, provider: object } } = {}
 	for _, provider in internal.singletons do
 		local id = Reflect.getId(provider)
 		local priority = Reflect.readMetadata(provider, "priority") :: number
 
-		table.insert(metadata, {
-            id = id,
-			priority = priority,
-			provider = provider,
-		})
+		metadata[id] = { id = id, priority = priority, provider = provider }
+		table.insert(providerIds, id)
 	end
 
-	local providerIds = map(metadata, function(metadata)
-		return metadata.id
-	end)
+	local start = Modding.getListeners("onStart") :: { onStart }
+	local init = Modding.getListeners("onInit") :: { onInit }
+	local stop = Modding.getListeners("onStop") :: { onStop }
 
 	local sortedProviders = topologicalSort(providerIds)
-	table.sort(metadata, function(a, b)
-		if a.priority ~= b.priority then
-			return a.priority < b.priority
+
+	local function sort(a, b)
+		local a_priority = Reflect.readMetadata(a, "priority") :: number
+		local b_priority = Reflect.readMetadata(b, "priority") :: number
+
+		if a_priority ~= b_priority then
+			return a_priority > b_priority
 		end
 
-		local aIndex = sortedProviders[a.id]
-		local bIndex = sortedProviders[b.id]
-		return aIndex < bIndex
-	end)
+		local a_id = Reflect.getId(a)
+		local b_id = Reflect.getId(b)
 
-	local start: { onStart } = {}
-	local init: { onInit } = {}
-	local stop: { onStop } = {}
-
-	Modding.onListenerAdded(function(provider)
-		local index = table.find(stop, provider::onStop)
-		if index then return end
-		table.insert(stop, provider::onStop)
-	end, "onStop")
-	Modding.onListenerRemoved(function(provider)
-		local index = table.find(stop, provider::onStop)
-		if not index then return end
-		table.remove(stop, index)
-	end, "onStop")
-
-	for _, dependency in metadata do
-		local provider = dependency.provider
-		if implements(provider, "onInit") then table.insert(init, provider::onInit) end
-		if implements(provider, "onStart") then table.insert(start, provider::onStart) end
-
-		Modding.addListener(provider)
+		return sortedProviders[a_id] > sortedProviders[b_id]
 	end
-	
-	Modding.onListenerAdded(function(provider)
-		if table.find(init, provider::onInit) then return end
-		table.insert(init, provider::onInit)
-	end, "onInit"):Disconnect()
 
-	Modding.onListenerAdded(function(provider)
-		if table.find(start, provider::onStart) then return end
-		table.insert(start, provider::onStart)
-	end, "onStart"):Disconnect()
+	table.sort(start, sort)
+	table.sort(init, sort)
+	table.sort(stop, sort)
 
-	for _, object in init do
-		object.onInit()
+	for _, listener in init do
+		xpcall(listener.onInit, function(result)
+			warn(`[artwork]: Error in onInit listener: {result}`)
+		end)
 	end
-	
+
 	internal.ignited = true
 
-	for _, object in start do
-		task.spawn(object.onStart)
+	for _, listener in start do
+		task.spawn(listener.onStart)
 	end
 
 	return function()
 		if Core.shutdown() then return end
 
-		for i=#stop, 1, -1 do
-			local object = stop[i]
-			table.remove(stop, i)
-			
-			task.spawn(object.onStop)
+		for _, listener in stop do
+			task.spawn(listener.onStop)
 		end
 
 		internal.shutdown = true
