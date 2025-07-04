@@ -89,10 +89,15 @@ function Modding.addLifecycleListener(name: string, callback: (...any) -> ())
     end
 end
 
-function Modding.getListeners(id: string)
+function Modding.getListeners(id: string): { object }?
     local listeners = internal.lifecycleListeners[id]
     if not listeners then return end
-    return table.clone(listeners)
+
+    local results = {}
+    for listener in listeners do
+        table.insert(results, listener)
+    end
+    return results
 end
 
 function Modding.onListenerAdded(callback: (object: object) -> (), id: string?)
