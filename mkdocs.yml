@@ -15,11 +15,12 @@ theme:
       toggle:
           icon: octicons/sun-24
           title: Switch to light theme
-    - media: "(prefers-color-scheme: light)"
-      scheme: artwork-light
-      toggle:
-          icon: octicons/moon-24
-          title: Switch to dark theme
+    # dark mode only for now, light mode code block looks bad
+    # - media: "(prefers-color-scheme: light)"
+    #   scheme: artwork-light
+    #   toggle:
+    #       icon: octicons/moon-24
+    #       title: Switch to dark theme
 
   custom_dir: docs/assets/overrides
   features:
