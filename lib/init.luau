@@ -2,25 +2,14 @@ local core = require(script.core)
 local modding = require(script.modding)
 local signal = require(script.signal)
 
-local main = core.extend(core, {
+local component = require(script.components.component)
+local net = require(script.networking.net)
+local lifecycles = require(script.lifecycles.lifecycles)
+
+local main = core:extend({
+	net = net,
     modding = modding,
     signal = signal,
-})
+}, component, lifecycles)
 
-local components = script.components 
-local networking = script.networking
-local lifecycles = script.lifecycles
-
-local external = {
-    component = require(components.component),
-    net = require(networking.net),
-    lifecycle = require(lifecycles.lifecycles),
-    lifecyclePresets = require(lifecycles.bundle),
-}
-
-local extras = main:extend({
-    net = external.net,
-    lifecycle = external.lifecyclePresets,
-}, external.lifecycle, external.component)
-
-return extras
+return main
