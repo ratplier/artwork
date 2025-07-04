@@ -21,19 +21,18 @@ local CoinProvider = {
     balances = {}
 }
 
-function CoinProvider.register(self: self, player: Player, amount: number?)
+function CoinProvider.register(player: Player, amount: number?)
     local startingAmount = if amount ~= nil then amount else 0
-    self.balances[player] = startingAmount
+    CoinProvider.balances[player] = startingAmount
 end
 
-function CoinProvider.unregister(self: self, player: Player)
-    self.balances[player] = nil
+function CoinProvider.unregister(player: Player)
+    CoinProvider.balances[player] = nil
 end
 
-function CoinProvider.increment(self: self, player: Player, amount: number)
-    self.balances[player] += amount
+function CoinProvider.increment(player: Player, amount: number)
+    CoinProvider.balances[player] += amount
 end
 
-type self = typeof(CoinProvider)
 return artwork.register(CoinProvider)
 ```
