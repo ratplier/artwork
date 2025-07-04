@@ -21,7 +21,7 @@ function lifecycles.createLifecycle(name: string, manager: (fire: () -> ()) -> (
 
     local function fire(...)
         for listener in listeners do
-            task.spawn(listener, ...)
+            task.spawn(listener[name], ...)
         end
     end
 
