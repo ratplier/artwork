@@ -1,9 +1,9 @@
 --!strict
 local CollectionService = game:GetService("CollectionService")
 
-local Reflect = require("../reflect")
-local Modding = require("../modding")
-local Signal = require("../signal")
+local Reflect = require("./reflect")
+local Modding = require("./modding")
+local Signal = require("./signal")
 
 type object = {}
 type set<T> = { [T]: true }
