@@ -1,6 +1,6 @@
 ## Methods
 
-#### Modding.addListener
+### Modding.addListener
 Registers an object as a listener. The API scans the object for string keys with function values and subscribes them to the corresponding lifecycle events.
 
 ```lua
@@ -27,7 +27,7 @@ local MyListener = {
 Modding.addListener(MyListener)
 ```
 
-#### Modding.removeListener
+### Modding.removeListener
 Removes and cleans up all event subscriptions for a given listener object. This is crucial for preventing memory leaks when a listener is disabled or unloaded.
 
 ```lua
@@ -43,7 +43,7 @@ function Modding.removeListener(object: object)
 Modding.removeListener(MyListener)
 ```
 
-#### Modding.addLifecycleListener
+### Modding.addLifecycleListener
 A convenience function for adding a single event listener without creating a full object. It returns a `cleanup` function that can be called to remove the listener.
 
 ```lua
@@ -71,8 +71,27 @@ local disconnectChatListener = Modding.addLifecycleListener("onPlayerChat", onPl
 disconnectChatListener()
 ```
 
-#### Modding.onListenerAdded
-Connects a callback that fires whenever a new listener is added. This can be used to react to new listeners being loaded.
+### Modding.getListeners
+Gets all the listeners under a specific id. The resulting array is not ordered.
+
+```lua
+function Modding.getListeners(id: string) -> { object }
+```
+
+**Parameters**
+
+- `id` (`string`): The specific event ID to watch for.
+
+**Returns**
+
+- (`{ object }`): An array of listener objects that implement the given event ID.
+
+```lua
+local listeners = Modding.getListeners("onPlayerChat")
+```
+
+### Modding.onListenerAdded
+Connects a callback that fires whenever a new listener is added. This cxan be used to react to new listeners being loaded.
 
 The function can operate in two modes:
 1. **Global:** If `id` is `nil`, the callback fires for *any* listener added.
@@ -109,7 +128,7 @@ end)
 connection:Disconnect()
 ```
 
-#### Modding.onListenerRemoved
+### Modding.onListenerRemoved
 Connects a callback that fires whenever a listener is removed via `Modding.removeListener`.
 
 ```lua
