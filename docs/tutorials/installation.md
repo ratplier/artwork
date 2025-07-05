@@ -3,7 +3,7 @@ you can use `pesde` or `wally` to install the framework.
 you can also download a binary from the github releases or build it yourself.
 
 ## From pesde (recommended)
-1. Make sure you have [pesde](https://pesde.dev) installed.
+1. Make sure you have [pesde](https://docs.pesde.dev/installation/) installed.
 2. Add the package
     ```
     pesde add ratplier/artwork
@@ -14,7 +14,7 @@ you can also download a binary from the github releases or build it yourself.
     ```
 
 ## From wally
-1. Make sure you have [wally](https://wally.run) installed.
+1. Make sure you have [wally](https://wally.run/install) installed.
 2. Add the package
     ```
     artwork = "ratplier/artwork@1.0.0"
