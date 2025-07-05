@@ -1,6 +1,6 @@
 ## Methods
 
-### Reflect.defineMetadata
+### defineMetadata
 Defines or updates a piece of metadata for an object. This is the primary function for writing metadata. If the object has not been seen by the API before, it will be registered automatically.
 
 ```lua
@@ -24,7 +24,7 @@ Reflect.defineMetadata(player, "IsAdmin", false)
 -- player.IsAdmin is still nil
 ```
 
-### Reflect.readMetadata
+### readMetadata
 Reads a piece of metadata from an object for a given key.
 
 ```lua
@@ -46,7 +46,7 @@ print("Is Admin:", isAdmin)
 -- > Is Admin: false
 ```
 
-### Reflect.getMetadata
+### getMetadata
 Retrieves the entire metadata table for a given object. This is useful if you need to read multiple metadata keys at once. If the object has no metadata, it will be registered automatically.
 
 ```lua
@@ -73,10 +73,11 @@ allMeta.NewValue = "hello"
 print(Reflect.readMetadata(player, "NewValue")) -- > hello
 ```
 
-### Reflect.register
+### register
 Explicitly registers an object with the Reflect API, preparing it for metadata storage.
 
-> [Note] In normal usage, you do not need to call this function. `defineMetadata` and `getMetadata` will call it automatically. It's provided for edge cases where you might want to pre-register a batch of objects.
+!!! note
+    In normal usage, you do not need to call this function. `defineMetadata` and `getMetadata` will call it automatically. It's provided for edge cases where you might want to pre-register a batch of objects.
 
 ```lua
 function Reflect.register(object: object)
@@ -92,7 +93,7 @@ Reflect.register(someObject)
 -- someObject is now known to the Reflect API
 ```
 
-### Reflect.getId
+### getId
 Gets the unique internal ID string generated for an object. This is mainly useful for debugging.
 
 ```lua
