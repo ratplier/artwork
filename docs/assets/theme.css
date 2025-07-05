@@ -1,5 +1,5 @@
 :root {
-  --dark-background-300: #464356;
+  --dark-background-200: #716e83;
   --dark-background: #1e1d25;
   --dark-background-1000: #22202b;
   
@@ -75,7 +75,7 @@
   --md-code-hl-name-color: var(--dark-text);
   --md-code-hl-operator-color: var(--dark-text);
   --md-code-hl-punctuation-color: var(--dark-text);
-  --md-code-hl-comment-color: var(--dark-background-300);
+  --md-code-hl-comment-color: var(--dark-background-200);
   --md-code-hl-generic-color: var(--dark-text);
   --md-code-hl-variable-color: var(--dark-text);
 
