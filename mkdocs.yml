@@ -9,18 +9,7 @@ theme:
   name: material
   logo: assets/logo.png
   favicon: assets/favicon.png
-  palette:
-    - media: "(prefers-color-scheme: dark)"
-      scheme: artwork-dark
-      toggle:
-          icon: octicons/sun-24
-          title: Switch to light theme
-    # dark mode only for now, light mode code block looks bad
-    # - media: "(prefers-color-scheme: light)"
-    #   scheme: artwork-light
-    #   toggle:
-    #       icon: octicons/moon-24
-    #       title: Switch to dark theme
+  theme: artwork-dark
 
   custom_dir: docs/assets/overrides
   features:
