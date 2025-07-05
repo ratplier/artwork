@@ -1,4 +1,6 @@
 --!strict
+local HttpService = game:GetService("HttpService")
+
 type object = {}
 type metadata = { [string]: unknown }
 
